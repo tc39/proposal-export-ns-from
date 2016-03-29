@@ -10,6 +10,8 @@
 
 **Transpiler:** See Babel's `es7.exportExtensions` option.
 
+> NOTE: Closely related to the [export-default-from](https://github.com/leebyron/ecmascript-export-default-from) proposal.
+
 ## Problem statement and rationale
 
 The `export ___ from "module"` statements are a very useful mechanism for
