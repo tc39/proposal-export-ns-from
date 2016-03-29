@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<pre class="metadata">
+title: ECMAScript export ns from
+stage: 1
+location: https://github.com/leebyron/ecmascript-export-ns-from
+copyright: false
+contributors: Lee Byron
+</pre>
+<script src="https://bterlson.github.io/ecmarkup/ecmarkup.js" defer></script>
+<link rel="stylesheet" href="https://bterlson.github.io/ecmarkup/elements.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/8.4/styles/solarized_light.min.css">
+<style>
+  tr.ins {
+    background-color: #e0f8e0;
+  }
+</style>
+
+<emu-intro id="intro">
+  <h1>Introduction</h1>
+
+  <p>This proposal adds a new form of "export from" which exports another module's namespace
+    exotic object as an exported name of another, filling a use case similar to the use cases
+    for existing "export from" forms.</p>
+
+  <p>See <a href="https://github.com/leebyron/ecmascript-export-ns-from">the proposal repository</a> for more information.</p>
+
+  <emu-note>
+    <p>This spec proposal is written as a diff against the <a href="http://www.ecma-international.org/ecma-262/6.0/">existing ECMAScript specification</a>.</p>
+  </emu-note>
+</emu-intro>
+
+<!-- es6num="15" -->
+<emu-clause id="sec-ecmascript-language-scripts-and-modules">
+  <h1>ECMAScript Language: Scripts and Modules</h1>
+
+  <!-- es6num="15.2" -->
+  <emu-clause id="sec-modules">
+    <h1>Modules</h1>
+
+    <!-- es6num="15.2.1" -->
+    <emu-clause id="sec-module-semantics">
+      <h1>Module Semantics</h1>
+
+      <!-- es6num="15.2.1.16" -->
+      <emu-clause id="sec-source-text-module-records">
+        <h1>Source Text Module Records</h1>
+
+        <emu-note>
+          <p><emu-xref href="#table-42">Table 42</emu-xref> gives examples of the ExportEntry record fields used to represent the syntactic export forms:</p>
+          <emu-table id="table-42" caption="Export Forms Mappings to ExportEntry Records" informative>
+            <table>
+              <tbody>
+              <tr>
+                <th>
+                  Export Statement Form
+                </th>
+                <th>
+                  [[ExportName]]
+                </th>
+                <th>
+                  [[ModuleRequest]]
+                </th>
+                <th>
+                  [[ImportName]]
+                </th>
+                <th>
+                  [[LocalName]]
+                </th>
+              </tr>
+              <tr>
+                <td>
+                  `export var v;`
+                </td>
+                <td>
+                  `"v"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"v"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export default function f(){}`
+                </td>
+                <td>
+                  `"default"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"f"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export default function(){}`
+                </td>
+                <td>
+                  `"default"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"*default*"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export default 42;`
+                </td>
+                <td>
+                  `"default"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"*default*"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export {x};`
+                </td>
+                <td>
+                  `"x"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"x"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export {v as x};`
+                </td>
+                <td>
+                  `"x"`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"v"`
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export {x} from "mod";`
+                </td>
+                <td>
+                  `"x"`
+                </td>
+                <td>
+                  `"mod"`
+                </td>
+                <td>
+                  `"x"`
+                </td>
+                <td>
+                  *null*
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export {v as x} from "mod";`
+                </td>
+                <td>
+                  `"x"`
+                </td>
+                <td>
+                  `"mod"`
+                </td>
+                <td>
+                  `"v"`
+                </td>
+                <td>
+                  *null*
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  `export * from "mod";`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"mod"`
+                </td>
+                <td>
+                  `"*"`
+                </td>
+                <td>
+                  *null*
+                </td>
+              </tr>
+              <tr class="ins">
+                <td>
+                  `export * as ns from "mod";`
+                </td>
+                <td>
+                  *null*
+                </td>
+                <td>
+                  `"mod"`
+                </td>
+                <td>
+                  `"*"`
+                </td>
+                <td>
+                  `"ns"`
+                </td>
+              </tr>
+              </tbody>
+            </table>
+          </emu-table>
+        </emu-note>
+      </emu-clause>
+
+    </emu-clause>
+
+    <!-- es6num="15.2.3" -->
+    <emu-clause id="sec-exports">
+      <h1>Exports</h1>
+      <h2>Syntax</h2>
+
+      <emu-grammar>
+        ExportDeclaration :
+          `export` VariableStatement
+          `export` Declaration
+          `export` `default` HoistableDeclaration[Default]
+          `export` `default` ClassDeclaration[Default]
+          `export` `default` [lookahead &lt;! {`function`, `class`}] AssignmentExpression[In] `;`
+      </emu-grammar>
+      <del class="block">
+      <emu-grammar>
+        ExportDeclaration :
+          `export` `*` FromClause `;`
+          `export` ExportClause FromClause `;`
+          `export` ExportClause `;`
+      </emu-grammar>
+      </del>
+      <ins class="block">
+      <emu-grammar>
+        ExportDeclaration :
+          `export` ExportFromClause FromClause `;`
+          `export` NamedExports `;`
+
+        ExportFromClause :
+          `*`
+          NamedExports
+          NameSpaceExport
+
+        NameSpaceExport :
+          `*` `as` IdentifierName
+      </emu-grammar>
+      </ins>
+
+      <del class="block">
+      <emu-grammar>
+        ExportClause :
+          `{` `}`
+          `{` ExportsList `}`
+          `{` ExportsList `,` `}`
+      </emu-grammar>
+      </del>
+      <ins class="block">
+      <emu-grammar>
+        NamedExports :
+          `{` `}`
+          `{` ExportsList `}`
+          `{` ExportsList `,` `}`
+      </emu-grammar>
+      </ins>
+      <emu-note>Renaming |ExportClause| to |NamedExports| reflects the similarly
+        named |NamedImports|, and should be reflected throughout the spec.</emu-note>
+
+      <emu-grammar>
+        ExportsList :
+          ExportSpecifier
+          ExportsList `,` ExportSpecifier
+
+        ExportSpecifier :
+          IdentifierName
+          IdentifierName `as` IdentifierName
+      </emu-grammar>
+
+      <!-- es6num="15.2.3.2" -->
+      <emu-clause id="sec-exports-static-semantics-boundnames">
+        <h1>Static Semantics: BoundNames</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` `*` FromClause `;`
+            `export` ExportClause FromClause `;`
+            `export` ExportClause `;`
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportFromClause FromClause `;`
+            `export` NamedExports `;`
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return a new empty List.
+        </emu-alg>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.3" -->
+      <emu-clause id="sec-exports-static-semantics-exportedbindings">
+        <h1>Static Semantics: ExportedBindings</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportClause FromClause `;`
+            `export` `*` FromClause `;`
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportFromClause FromClause `;`
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return a new empty List.
+        </emu-alg>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.4" -->
+      <emu-clause id="sec-exports-static-semantics-exportednames">
+        <h1>Static Semantics: ExportedNames</h1>
+        <del class="block">
+        <emu-grammar>ExportDeclaration : `export` `*` FromClause `;`</emu-grammar>
+        <emu-alg>
+          1. Return a new empty List.
+        </emu-alg>
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportClause FromClause `;`
+            `export` ExportClause `;`
+        </emu-grammar>
+        <emu-alg>
+          1. Return the ExportedNames of |ExportClause|.
+        </emu-alg>
+        </del>
+
+        <ins class="block">
+        <emu-grammar>ExportDeclaration : `export` ExportFromClause FromClause `;`</emu-grammar>
+        <emu-alg>
+          1. Return the ExportedNames of ExportFromClause.
+        </emu-alg>
+        <emu-grammar>ExportFromClause : `*`</emu-grammar>
+        <emu-alg>
+          1. Return a new empty List.
+        </emu-alg>
+        <emu-grammar>ExportFromClause : NamedExports</emu-grammar>
+        <emu-alg>
+          1. Return the ExportedNames of |NamedExports|.
+        </emu-alg>
+        <emu-grammar>ExportFromClause : NameSpaceExport</emu-grammar>
+        <emu-alg>
+          1. Return the ExportedNames of |NameSpaceExport|.
+        </emu-alg>
+        </ins>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.5" -->
+      <emu-clause id="sec-exports-static-semantics-exportentries">
+        <h1>Static Semantics: ExportEntries</h1>
+        <del class="block">
+        <emu-grammar>ExportDeclaration : `export` `*` FromClause `;`</emu-grammar>
+        <emu-alg>
+          1. Let _module_ be the sole element of ModuleRequests of |FromClause|.
+          1. Let _entry_ be the Record {[[ModuleRequest]]: _module_, [[ImportName]]: `"*"`, [[LocalName]]: *null*, [[ExportName]]: *null* }.
+          1. Return a new List containing _entry_.
+        </emu-alg>
+        <emu-grammar>ExportDeclaration : `export` ExportClause FromClause `;`</emu-grammar>
+        <emu-alg>
+          1. Let _module_ be the sole element of ModuleRequests of |FromClause|.
+          1. Return ExportEntriesForModule of |ExportClause| with argument _module_.
+        </emu-alg>
+        </del>
+        <ins class="block">
+        <emu-grammar>ExportDeclaration : `export` ExportFromClause FromClause `;`</emu-grammar>
+        <emu-alg>
+          1. Let _module_ be the sole element of ModuleRequests of |FromClause|.
+          1. Return ExportEntriesForModule of |ExportFromClause| with argument _module_.
+        </emu-alg>
+        </ins>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.6" -->
+      <emu-clause id="sec-static-semantics-exportentriesformodule">
+        <h1>Static Semantics: ExportEntriesForModule</h1>
+        <p>With parameter _module_.</p>
+        <ins class="block">
+        <emu-grammar>ExportFromClause : `*`</emu-grammar>
+        <emu-alg>
+          1. Return a new List containing the Record {[[ModuleRequest]]: _module_, [[ImportName]]: "*", [[LocalName]]: null, [[ExportName]]: null }.
+        </emu-alg>
+        <emu-grammar>NameSpaceExport : `*` as IdentifierName</emu-grammar>
+        <emu-alg>
+          1. Let _exportName_ be the StringValue of |IdentifierName|.
+          1. Return a new List containing the Record {[[ModuleRequest]]: _module_, [[ImportName]]: "*", [[LocalName]]: null, [[ExportName]]: _exportName_ }.
+        </emu-alg>
+        </ins>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.7" -->
+      <emu-clause id="sec-exports-static-semantics-isconstantdeclaration">
+        <h1>Static Semantics: IsConstantDeclaration</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` `*` FromClause `;`
+            `export` ExportClause FromClause `;`
+            `export` ExportClause `;`
+            `export` `default` AssignmentExpression `;`
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportFromClause FromClause `;`
+            `export` NamedExports `;`
+            `export` `default` AssignmentExpression `;`
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return *false*.
+        </emu-alg>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.8" -->
+      <emu-clause id="sec-exports-static-semantics-lexicallyscopeddeclarations">
+        <h1>Static Semantics: LexicallyScopedDeclarations</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` `*` FromClause `;`
+            `export` ExportClause FromClause `;`
+            `export` ExportClause `;`
+            `export` VariableStatement
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportFromClause FromClause `;`
+            `export` NamedExports `;`
+            `export` VariableStatement
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return a new empty List.
+        </emu-alg>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.9" -->
+      <emu-clause id="sec-exports-static-semantics-modulerequests">
+        <h1>Static Semantics: ModuleRequests</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration : `export` `*` FromClause `;`
+
+          ExportDeclaration : `export` ExportClause FromClause `;`
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration : `export` ExportFromClause FromClause `;`
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return the ModuleRequests of |FromClause|.
+        </emu-alg>
+      </emu-clause>
+
+      <!-- es6num="15.2.3.11" -->
+      <emu-clause id="sec-exports-runtime-semantics-evaluation">
+        <h1>Runtime Semantics: Evaluation</h1>
+        <del class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` `*` FromClause `;`
+            `export` ExportClause FromClause `;`
+            `export` ExportClause `;`
+        </emu-grammar>
+        </del>
+        <ins class="block">
+        <emu-grammar>
+          ExportDeclaration :
+            `export` ExportFromClause FromClause `;`
+            `export` NamedExports `;`
+        </emu-grammar>
+        </ins>
+        <emu-alg>
+          1. Return NormalCompletion(~empty~).
+        </emu-alg>
+      </emu-clause>
+    </emu-clause>
+  </emu-clause>
+</emu-clause>
