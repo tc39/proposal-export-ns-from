@@ -17,7 +17,7 @@ building up "package" modules in a declarative way. In the ECMAScript 2015 spec,
 we can:
 
 * export through a single export with `export {x} from "mod"`
-* ...optionally renaming it with `export {x as v} from "mod"`
+* ...optionally renaming it with `export {x as v} from "mod"`.
 * We can also spread all exports with `export * from "mod"`.
 
 These three export-from statements are easy to understand if you understand the
@@ -64,37 +64,62 @@ Export Statement Form           | [[ModuleRequest]] | [[ImportName]] | [[LocalNa
 `export * as ns from "mod";`    | `"mod"`           | `"*"`          | **null**      | `"ns"`
 
 
-### Symmetry between import and export
+## Symmetry between import and export
 
 There's a syntactic symmetry between the export-from statements and the import
 statements they resemble. There is also a semantic symmetry; where import
 creates a locally named binding, export-from creates an export entry.
 
-As an example:
-
-```js
-export {v} from "mod";
-```
-
-Is symmetric to:
+As an existing example:
 
 ```js
 import {v} from "mod";
 ```
 
-However, where importing `v` introduces a name in the local scope, export-from
-`v` does not alter the local scope, instead creating an export entry.
+If then `v` should be exported, this can be followed by an `export`. However, if
+`v` is unused in the local scope, then it has introduced a name to the local
+scope unnecessarily.
+
+```js
+import {v} from "mod";
+export {v};
+```
+
+A single "export from" line directly creates an export entry, and does not alter
+the local scope. It is *symmetric* to the similar "import from" statement.
+
+```js
+export {v} from "mod";
+```
+
+This presents a developer experience where it is expected that replacing the
+word `import` with `export` will always provide this symmetric behavior.
+
+### Proposed addition:
 
 The proposed addition follows this same symmetric pattern:
 
-**Exporting a namespace exotic object without altering local scope:**
+Importing a namespace exotic object (existing):
 
 ```js
-// proposed:
-export * as ns from "mod";
-// symmetric to:
 import * as ns from "mod";
 ```
+
+Exporting that name (existing):
+
+```js
+import * as ns from "mod";
+export {ns};
+```
+
+Symmetric "export from" (proposed):
+
+```js
+export * as ns from "mod";
+```
+
+
+### Table showing symmetry
 
 Using the terminology of [Table 40][] and [Table 42][] in ECMAScript 2015, the
 export-from form can be created from the symmetric import form by setting
@@ -103,8 +128,6 @@ export-from's **[[ExportName]]** to import's **[[LocalName]]** and export-from's
 
 [Table 40]: http://www.ecma-international.org/ecma-262/6.0/#table-40
 [Table 42]: http://www.ecma-international.org/ecma-262/6.0/#table-42
-
-#### Table showing symmetry
 
 Statement Form                          | [[ModuleRequest]] | [[ImportName]] | [[LocalName]]  | [[ExportName]]
 --------------                          | ----------------- | -------------- | -------------- | --------------
