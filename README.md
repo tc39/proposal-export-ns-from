@@ -1,12 +1,10 @@
-# export-ns-from
-
-## Future ECMAScript Proposal
+# ECMAScript Proposal: export ns from
 
 **Stage:** 1
 
 **Author:** Lee Byron
 
-**Specification:** [Spec.md](./Spec.md)
+**Specification:** http://leebyron.com/ecmascript-export-ns-from/
 
 **AST:** [ESTree.md](./ESTree.md)
 
