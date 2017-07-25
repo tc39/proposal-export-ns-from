@@ -1,0 +1,11 @@
+{
+  "https://tc39.github.io/proposal-export-ns-from/": [
+    {
+      "type": "production",
+      "id": "prodExportNamespaceFrom",
+      "name": "ExportNamespaceFrom",
+      "location": "",
+      "key": "ExportNamespaceFrom"
+    }
+  ]
+}
