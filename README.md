@@ -12,7 +12,7 @@
 
 **Transpiler:** See Babel's [transform-export-extensions](https://babeljs.io/docs/plugins/transform-export-extensions/) plugin.
 
-> NOTE: Closely related to the [export-default-from](https://github.com/tc39/proposal-export-ns-from) proposal.
+> NOTE: Closely related to the [export-default-from](https://github.com/tc39/proposal-export-default-from) proposal.
 
 ## Problem statement and rationale
 
