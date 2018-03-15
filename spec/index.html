@@ -396,9 +396,9 @@ contributors: Lee Byron
         <emu-alg>
           1. Return the ExportedNames of |NamedExports|.
         </emu-alg>
-        <emu-grammar>ExportFromClause : NameSpaceExport</emu-grammar>
+        <emu-grammar>NameSpaceExport : `*` `as` IdentifierName </emu-grammar>
         <emu-alg>
-          1. Return the ExportedNames of |NameSpaceExport|.
+          1. Return a List containing the StringValue of |IdentifierName|.
         </emu-alg>
         </ins>
       </emu-clause>
