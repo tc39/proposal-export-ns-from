@@ -1,10 +1,15 @@
 # ECMAScript Proposal: export ns from
 
-**Stage:** 1
+**Stage:** 4, already [merged to ECMA-262](https://github.com/tc39/ecma262/pull/1174)!
+
+**Champion:** Valerie Young
 
 **Author:** Lee Byron
 
-**Reviewers:** Caridy Patiño
+**Reviewers:**
+  - Caridy Patiño
+  - John-David Dalton
+  - Leo Balter
 
 **Specification:** https://tc39.github.io/proposal-export-ns-from/
 
