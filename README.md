@@ -15,9 +15,9 @@
 
 **AST:** [ESTree.md](./ESTree.md)
 
-**Transpiler:** See Babel's [transform-export-extensions](https://babeljs.io/docs/plugins/transform-export-extensions/) plugin.
+**Transpiler:** See Babel's [export-namespace-from](https://babeljs.io/docs/en/babel-plugin-proposal-export-namespace-from) plugin.
 
-> NOTE: Closely related to the [export-default-from](https://github.com/tc39/proposal-export-ns-from) proposal.
+> NOTE: Closely related to the [export-default-from](https://github.com/tc39/proposal-export-default-from) proposal.
 
 ## Problem statement and rationale
 
