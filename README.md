@@ -1,6 +1,6 @@
 # ECMAScript Proposal: export ns from
 
-**Stage:** 4, already [merged to ECMA-262](https://github.com/tc39/ecma262/pull/1174)!
+**Stage:** N/A - this instead became a "needs consensus" PR, and is [merged into ECMA-262](https://github.com/tc39/ecma262/pull/1174)!
 
 **Champion:** Valerie Young
 
